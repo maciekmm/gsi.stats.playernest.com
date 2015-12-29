@@ -36,11 +36,6 @@ export function followMatch(player, data) {
 			value: data.map.phase
 		});
 	}
-
-	if (data.player.team && !player.match.startingTeam) {
-		player.match.starting_team = data.player.team;
-	}
-
 }
 
 const progressive = [{
@@ -85,10 +80,10 @@ const progressive = [{
 }];
 // Follows rounds
 export function followRound(player, data) {
-	if (data.round && data.round.phase == 'warmup') {
+	if (data.map && data.map.phase === 'warmup' || !player.oldData) {
 		return;
 	}
-
+	//                                          If the round is over and it got new data (knife rounds etc) TODO: Clean this up  || (player.match.rounds[data.map.round].phase[player.match.rounds[data.map.round].length-1]=="over" && data.round.phase != "over")
 	if (!player.match.rounds[data.map.round]) {
 		player.match.rounds[data.map.round] = {
 			general: {},
@@ -105,8 +100,6 @@ export function followRound(player, data) {
 		if (!key.general && !helpers.isRightPlayer(player, data, round)) {
 			continue;
 		}
-
-
 		// Current value
 		let value = deepValue(data, key.key);
 		// Previous value
@@ -126,7 +119,6 @@ export function followRound(player, data) {
 		}
 
 		if (key.flatten) {
-			console.log(key.key+"+"+value+":"+oldValue);
 			// calculate delta and insert time as many times
 			for (let diff = value - oldValue; diff > 0; diff--) {
 				temp[newKey].push(data.provider.timestamp);
@@ -148,19 +140,18 @@ export function followRound(player, data) {
 
 		//followWeapons(round, data, oldData);
 	}
-
-	if (!player.oldData) {
-		return null;
-	}
-
 	// Death
 	if (player.oldData.player && !round.death && data.player.match_stats.deaths > player.oldData.player.match_stats.deaths) {
 		round.death = data.provider.timestamp;
 	}
 
 	// Who won the round
-	if (data.round && data.round.win_team && !player.oldData.round.win_team) {
+	if (player.oldData.round && data.round && data.round.win_team && !player.oldData.round.win_team) {
 		round.win_team = data.round.win_team;
+	}
+
+	if(!round.team && player.team) {
+		round.team = player.team;
 	}
 }
 
@@ -217,7 +208,7 @@ function deepValue(obj, path) {
 		if (obj[path[i]]) {
 			obj = obj[path[i]];
 		} else {
-			return undefined;
+			return null;
 		}
 	}
 	return obj;

@@ -60,7 +60,7 @@ export class Pipe {
 			}
 		}
 
-		//console.log(JSON.stringify(player.match));
+		console.log(JSON.stringify(player.match));
 
 		callback();
 	}

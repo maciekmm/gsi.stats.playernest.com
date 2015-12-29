@@ -23,6 +23,10 @@ export function getRound(player, data) {
 }
 
 export function isRightPlayer(player, data, round) {
+	if (!data.player) {
+		return false;
+	}
+
 	if (data.player.steamid != player.steamid) {
 		return false;
 	}
@@ -33,5 +37,10 @@ export function isRightPlayer(player, data, round) {
 		return true;
 	}
 
-	return isRightPlayer(player, data, getRound(player, data));
+	let newRound = getRound(player,data);
+	if(!newRound) {
+		return false;
+	}
+
+	return isRightPlayer(player, data, newRound);
 }
