@@ -1,0 +1,21 @@
+{
+  "name": "playernest.stats",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Gathers data from the game using csgo game state integration",
+  "main": "app.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/maciekmm/playernest.git"
+  },
+  "author": "maciekmm",
+  "license": "BSD-2-Clause",
+  "bugs": {
+    "url": "https://github.com/maciekmm/playernest/issues"
+  },
+  "homepage": "https://github.com/maciekmm/playernest#readme",
+  "dependencies": {
+    "mongoose": "^4.3.4",
+    "node-cache": "^3.0.0"
+  }
+}

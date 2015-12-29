@@ -1,0 +1,11 @@
+{
+	"mongo": {
+		"uri": "localhost",
+		"db": "stats"
+	},
+
+	"server": {
+		"hostname": "localhost",
+		"port": 4400
+	}
+}
