@@ -1,0 +1,38 @@
+[{
+	"key": "round.phase",
+	"general": true
+}, {
+	"key": "round.bomb",
+	"general": true,
+	"non_null": true
+}, {
+	"key": "player.activity"
+}, {
+	"key": "player.state.health"
+}, {
+	"key": "player.state.armor"
+}, {
+	"key": "player.state.flashed",
+	"increase": true
+}, {
+	"key": "player.state.smoked"
+}, {
+	"key": "player.state.burning"
+}, {
+	"key": "player.state.money"
+}, {
+	"key": "player.state.round_killhs",
+	"flatten": true
+}, {
+	"key": "player.match_stats.kills",
+	"flatten": true
+}, {
+	"key": "player.match_stats.assists",
+	"flatten": true
+}, {
+	"key": "player.match_stats.score",
+	"flatten": true
+}, {
+	"key": "player.match_stats.mvps",
+	"flatten": true
+}]

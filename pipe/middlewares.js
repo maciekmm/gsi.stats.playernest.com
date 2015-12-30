@@ -1,5 +1,7 @@
 import * as helpers from "./helpers";
 
+var util = require("util");
+
 // Checks whether request contains are needed fields
 export function checkComponents(data) {
 	if (!data.provider || !data.map || !data.player || !data.auth) {
@@ -38,52 +40,9 @@ export function followMatch(player, data) {
 	}
 }
 
-const progressive = [{
-	key: "round.phase",
-	general: true
-}, {
-	key: "round.bomb",
-	//put into general section
-	general: true
-}, {
-	key: "player.activity",
-}, {
-	key: "player.state.health",
-}, {
-	key: "player.state.armor",
-}, {
-	key: "player.state.flashed",
-	//only log if value increased
-	increase: true
-}, {
-	key: "player.state.smoked",
-}, {
-	key: "player.state.burning",
-}, {
-	key: "player.state.money",
-}, {
-	key: "player.state.round_killhs",
-	//put times as many times as delta is
-	flatten: true
-}, {
-	key: "player.match_stats.kills",
-	flatten: true
-}, {
-	key: "player.match_stats.assists",
-	flatten: true
-}, {
-	key: "player.match_stats.score",
-	flatten: true
-}, {
-	key: "player.match_stats.mvps",
-	flatten: true
-}];
+const progressive = require("./round-props.json");
 // Follows rounds
 export function followRound(player, data) {
-	if (data.map && data.map.phase === 'warmup' || !player.oldData) {
-		return;
-	}
-	//                                          If the round is over and it got new data (knife rounds etc) TODO: Clean this up  || (player.match.rounds[data.map.round].phase[player.match.rounds[data.map.round].length-1]=="over" && data.round.phase != "over")
 	if (!player.match.rounds[data.map.round]) {
 		player.match.rounds[data.map.round] = {
 			general: {},
@@ -91,8 +50,10 @@ export function followRound(player, data) {
 		};
 	}
 
-	// Most retarded bug i've ever seen.
-	// Game changes round number faster than state...
+	if ((data.map && data.map.phase !== 'live') || !player.oldData) {
+		return;
+	}
+
 	let round = helpers.getRound(player, data);
 
 	for (let key of progressive) {
@@ -107,6 +68,10 @@ export function followRound(player, data) {
 
 		// If the value changed or it decreased
 		if (value == oldValue || (key.increase && value < oldValue)) {
+			continue;
+		}
+
+		if (!value&&key.non_null) {
 			continue;
 		}
 
@@ -140,6 +105,7 @@ export function followRound(player, data) {
 
 		//followWeapons(round, data, oldData);
 	}
+
 	// Death
 	if (player.oldData.player && !round.death && data.player.match_stats.deaths > player.oldData.player.match_stats.deaths) {
 		round.death = data.provider.timestamp;
@@ -150,19 +116,22 @@ export function followRound(player, data) {
 		round.win_team = data.round.win_team;
 	}
 
-	if(!round.team && player.team) {
-		round.team = player.team;
+	if (!round.team && data.player.team) {
+		round.team = data.player.team;
 	}
+
+	console.log(util.inspect(round, false, null));
 }
 
 export function archive(player, data) {
-	if(!player.oldData) {
+	if (!player.oldData) {
 		player.oldData = {};
 	}
 	player.oldData.map = data.map;
 	player.oldData.provider = data.provider;
 	player.oldData.round = data.round;
 	player.oldData.auth = data.auth;
+
 	if (helpers.isRightPlayer(player, data)) {
 		player.oldData.player = data.player;
 	}

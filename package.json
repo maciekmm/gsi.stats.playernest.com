@@ -1,5 +1,5 @@
 {
-  "name": "playernest.stats",
+  "name": "gsi.stats.playernest.com",
   "version": "0.0.1",
   "private": true,
   "description": "Gathers data from the game using csgo game state integration",
@@ -11,9 +11,8 @@
   "author": "maciekmm",
   "license": "BSD-2-Clause",
   "bugs": {
-    "url": "https://github.com/maciekmm/playernest/issues"
+    "url": "https://github.com/maciekmm/gsi.stats.playernest.com/issues"
   },
-  "homepage": "https://github.com/maciekmm/playernest#readme",
   "dependencies": {
     "mongoose": "^4.3.4",
     "node-cache": "^3.0.0"
