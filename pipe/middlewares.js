@@ -1,6 +1,8 @@
 import * as helpers from "./helpers";
+import {Match} from "../models/match";
+import {Round} from "../models/round";
 
-var util = require("util");
+const util = require("util");
 
 // Checks whether request contains are needed fields
 export function checkComponents(data) {
@@ -19,20 +21,14 @@ export function checkCompetitive(data) {
 // Monitors match variables
 export function followMatch(player, data) {
 	if (!player.match) {
-		player.match = {
-			rounds: []
-		};
-		player.match.map = data.map.name;
-		player.match.mode = data.map.mode;
-		player.match.start = data.provider.timestamp;
-		player.match.version = data.provider.version;
+		player.match = new Match(data.map.name, data.map.mode, data.provider.timestamp, data.provider.version);
 	}
 
-	if (!player.match.phases) {
-		player.match.phases = [];
+	if (data.map.phase == "gameover" && player.match.isOver()) {
+		return new Error("Match already over");
 	}
 
-	if (!player.oldData || data.map.phase != player.oldData.map.phase) {
+	if (!player._oldData || data.map.phase != player._oldData.map.phase) {
 		player.match.phases.push({
 			time: data.provider.timestamp,
 			value: data.map.phase
@@ -44,13 +40,10 @@ const progressive = require("./round-props.json");
 // Follows rounds
 export function followRound(player, data) {
 	if (!player.match.rounds[data.map.round]) {
-		player.match.rounds[data.map.round] = {
-			general: {},
-			player: {}
-		};
+		player.match.rounds[data.map.round] = new Round();
 	}
 
-	if ((data.map && data.map.phase !== 'live') || !player.oldData) {
+	if ((data.map && data.map.phase !== 'live') || !player._oldData) {
 		return;
 	}
 
@@ -62,16 +55,16 @@ export function followRound(player, data) {
 			continue;
 		}
 		// Current value
-		let value = deepValue(data, key.key);
+		let value = helpers.deepValue(data, key.key);
 		// Previous value
-		let oldValue = player.oldData ? deepValue(player.oldData, key.key) : null;
+		let oldValue = player._oldData ? helpers.deepValue(player._oldData, key.key) : null;
 
 		// If the value changed or it decreased
 		if (value == oldValue || (key.increase && value < oldValue)) {
 			continue;
 		}
 
-		if (!value&&key.non_null) {
+		if (!value && key.non_null) {
 			continue;
 		}
 
@@ -107,38 +100,38 @@ export function followRound(player, data) {
 	}
 
 	// Death
-	if (player.oldData.player && !round.death && data.player.match_stats.deaths > player.oldData.player.match_stats.deaths) {
-		round.death = data.provider.timestamp;
+	if (player._oldData.player && !round.player.death && data.player.match_stats.deaths > player._oldData.player.match_stats.deaths) {
+		round.player.death = data.provider.timestamp;
 	}
 
 	// Who won the round
-	if (player.oldData.round && data.round && data.round.win_team && !player.oldData.round.win_team) {
+	if (player._oldData.round && data.round && data.round.win_team && !player._oldData.round.win_team) {
 		round.win_team = data.round.win_team;
 	}
 
-	if (!round.team && data.player.team) {
-		round.team = data.player.team;
+	if (!round.player.team && data.player.team) {
+		round.player.team = data.player.team;
 	}
 
-	console.log(util.inspect(round, false, null));
+	//console.log(util.inspect(round, false, null));
 }
 
 export function archive(player, data) {
-	if (!player.oldData) {
-		player.oldData = {};
+	if (!player._oldData) {
+		player._oldData = {};
 	}
-	player.oldData.map = data.map;
-	player.oldData.provider = data.provider;
-	player.oldData.round = data.round;
-	player.oldData.auth = data.auth;
+	player._oldData.map = data.map;
+	player._oldData.provider = data.provider;
+	player._oldData.round = data.round;
+	player._oldData.auth = data.auth;
 
 	if (helpers.isRightPlayer(player, data)) {
-		player.oldData.player = data.player;
+		player._oldData.player = data.player;
 	}
 }
 
 // TODO: Make this
-// function followWeapons(round, data, player.oldData) {
+// function followWeapons(round, data, player._oldData) {
 // 	if (!round.weapons) {
 // 		round.weapons = {
 // 			"primary": [],
@@ -169,16 +162,3 @@ export function archive(player, data) {
 // 		}
 // 	}
 // }
-
-// Returns value from string path "sth.sth.sth"
-function deepValue(obj, path) {
-	path = path.split('.');
-	for (let i = 0, len = path.length; i < len; i++) {
-		if (obj[path[i]]) {
-			obj = obj[path[i]];
-		} else {
-			return null;
-		}
-	}
-	return obj;
-}

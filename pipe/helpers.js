@@ -1,25 +1,3 @@
-// Whether data can be a continuation of match
-export function canContinue(match, data) {
-	if (match.map != data.map.name) {
-		return false;
-	}
-
-	if (match.rounds.length > data.map.round + 1) {
-		return false;
-	}
-
-	//TODO: Check if score counts
-	return true;
-}
-
-// Whether match data is trash
-// TODO: It's very temporary
-export function isTrash(match) {
-	if(match.rounds.length < 5) {
-		return true;
-	}
-}
-
 // Returns a round that information is related to.
 // This is a work-around for stupidity from volvo side
 export function getRound(player, data) {
@@ -36,12 +14,12 @@ export function getRound(player, data) {
 
 // As there's no direct way of checking if player is controlling a bot checking for player's death is required
 export function isRightPlayer(player, data, round) {
-	if (!data.player || data.player.steamid != player.steamid) {
+	if (!data.player || data.player.steamid != player._id) {
 		return false;
 	}
 
 	// We need to check if the death occured in this or previous response
-	if (round && round.death && round.death != data.provider.timestamp) {
+	if (round && round.player.death && round.player.death != data.provider.timestamp) {
 		return false;
 	} else if (round) {
 		return true;
@@ -55,4 +33,17 @@ export function isRightPlayer(player, data, round) {
 	}
 
 	return isRightPlayer(player, data, newRound);
+}
+
+// Returns value from string path "sth.sth.sth"
+export function deepValue(obj, path) {
+	path = path.split('.');
+	for (let i = 0, len = path.length; i < len; i++) {
+		if (obj[path[i]]) {
+			obj = obj[path[i]];
+		} else {
+			return null;
+		}
+	}
+	return obj;
 }

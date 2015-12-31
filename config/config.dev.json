@@ -1,7 +1,6 @@
 {
 	"mongo": {
-		"uri": "localhost",
-		"db": "stats"
+		"uri": "mongodb://admin:admin@localhost/stats"
 	},
 
 	"server": {

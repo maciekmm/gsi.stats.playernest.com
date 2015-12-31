@@ -4,16 +4,25 @@ import {
 from "./pipe/pipe";
 
 const http = require("http");
-
 const cfg = require("./config/config." + (process.env.NODE_ENV || 'dev') + ".json");
+const MongoClient = require('mongodb').MongoClient;
+const co = require("co");
+
 
 class GSI {
-	constructor() {
-		//this._db = new DB(cfg.mongo.uri, cfg.mongo.db);
-		this.pipe = new Pipe(this._db);
+
+	start() {
+		MongoClient.connect(cfg.mongo.uri, (err, db) => {
+			console.log("was");
+			db.authenticate("admin", "admin", (err, result) => {
+				this._db = db;
+				this.createServer().listen(cfg.server.port, cfg.server.host);
+			});
+		});
 	}
 
 	createServer() {
+		this.pipe = new Pipe(this._db.collection("players"));
 		this._server = http.createServer((request, response) => {
 			if (request.method != 'POST') {
 				response.writeHead(405);
@@ -33,28 +42,15 @@ class GSI {
 			});
 
 			request.on('end', () => {
-				try {
-					this.pipe.process(body, (error) => {
-						if (error) {
-							//TODO: Some logger
-							console.log(error);
-						}
-					});
-				} catch (e) {
-					console.log(e);
-				} finally {
-					//To avoid spam we return 200 ALWAYS;
-					response.writeHead(200);
-					response.end();
-				}
+				co(this.pipe.process(body)).catch((e)=>{
+					console.log(e.stack);
+				});
+				response.writeHead(200);
+				response.end();
 			});
 		});
-		return this;
-	}
-
-	start() {
-		this._server.listen(cfg.server.port, cfg.server.hostname);
+		return this._server;
 	}
 }
 
-new GSI().createServer().start();
+new GSI().start();

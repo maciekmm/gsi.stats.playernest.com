@@ -14,7 +14,8 @@
     "url": "https://github.com/maciekmm/gsi.stats.playernest.com/issues"
   },
   "dependencies": {
-    "mongoose": "^4.3.4",
+    "co": "^4.6.0",
+    "mongodb": "^2.1.2",
     "node-cache": "^3.0.0"
   }
 }
