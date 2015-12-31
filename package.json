@@ -1,12 +1,11 @@
 {
   "name": "gsi.stats.playernest.com",
   "version": "0.0.1",
-  "private": true,
   "description": "Gathers data from the game using csgo game state integration",
   "main": "app.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/maciekmm/playernest.git"
+    "url": "git+https://github.com/maciekmm/gsi.stats.playernest.git"
   },
   "author": "maciekmm",
   "license": "BSD-2-Clause",
@@ -14,7 +13,10 @@
     "url": "https://github.com/maciekmm/gsi.stats.playernest.com/issues"
   },
   "dependencies": {
+    "body-parser": "^1.14.2",
     "co": "^4.6.0",
+    "co-express": "^1.2.1",
+    "express": "^4.13.3",
     "mongodb": "^2.1.2",
     "node-cache": "^3.0.0"
   }

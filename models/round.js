@@ -1,6 +1,7 @@
 export class Round {
 	static fromDocument(doc) {
-		return new Round(doc.general, doc.player);
+		let round = new Round();
+		Object.assign(round, doc);
 	}
 
 	constructor() {

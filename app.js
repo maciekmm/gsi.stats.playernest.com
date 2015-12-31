@@ -1,56 +1,31 @@
 import {
 	Pipe
 }
-from "./pipe/pipe";
+from "./gsi/pipe";
 
-const http = require("http");
+import {PlayersController} from "./controllers/players";
+
 const cfg = require("./config/config." + (process.env.NODE_ENV || 'dev') + ".json");
 const MongoClient = require('mongodb').MongoClient;
-const co = require("co");
+const wrap = require("co-express");
+const bodyParser = require("body-parser");
 
+MongoClient.connect(cfg.mongo.uri, (err, db) => {
+	db.authenticate("admin", "admin", (err, result) => {
+		start(db);
+	});
+});
 
-class GSI {
+function start(db) {
+	const app = require("express")();
+	const coord = new PlayersController(db.collection("players"));
+	const pipe = new Pipe(coord);
 
-	start() {
-		MongoClient.connect(cfg.mongo.uri, (err, db) => {
-			console.log("was");
-			db.authenticate("admin", "admin", (err, result) => {
-				this._db = db;
-				this.createServer().listen(cfg.server.port, cfg.server.host);
-			});
-		});
-	}
+	app.use(bodyParser.json());
 
-	createServer() {
-		this.pipe = new Pipe(this._db.collection("players"));
-		this._server = http.createServer((request, response) => {
-			if (request.method != 'POST') {
-				response.writeHead(405);
-				response.end();
-				return;
-			}
+	app.post('/gsi', wrap(pipe.process));
 
-			let body = '';
-			request.on('data', (data) => {
-				if (body.length > 3000000) {
-					console.log("Response too long");
-					response.writeHead(403);
-					response.end("Response too long");
-					return;
-				}
-				body += data;
-			});
-
-			request.on('end', () => {
-				co(this.pipe.process(body)).catch((e)=>{
-					console.log(e.stack);
-				});
-				response.writeHead(200);
-				response.end();
-			});
-		});
-		return this._server;
-	}
+	app.listen(cfg.server.port, function() {
+		console.log("Started");
+	});
 }
-
-new GSI().start();

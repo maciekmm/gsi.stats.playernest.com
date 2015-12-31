@@ -1,12 +1,15 @@
-import {Round} from "./round";
+import {
+	Round
+}
+from "./round";
 
 export class Match {
 	static fromDocument(doc) {
-		let match = new Match(doc.map, doc.mode, doc.start, doc.version);
-		match.phases = doc.phases;
-		for(let i=0;i<doc.rounds.length;i++) {
-			if(doc.rounds[i]) {
-				match.rounds[i] = Round.fromDocument(doc.rounds[1]);
+		let match = new Match();
+		Object.assign(match, doc);
+		for (let i = 0; i < doc.rounds.length; i++) {
+			if (doc.rounds[i]) {
+				match.rounds[i] = Round.fromDocument(doc.rounds[i]);
 			}
 		}
 		return match;
@@ -38,8 +41,18 @@ export class Match {
 	// Whether match data is trash
 	// TODO: It's very temporary
 	isTrash() {
-		if (this.rounds.length < 5) {
-			return true;
+		let score = 0;
+		let rounds = 0;
+		for (let round in this.rounds) {
+			if (round) {
+				rounds++;
+			}
+		}
+		if (rounds + 1 < this.rounds.length) {
+			score += 5;
+		}
+		if (rounds < 5) {
+			score += 5;
 		}
 	}
 
