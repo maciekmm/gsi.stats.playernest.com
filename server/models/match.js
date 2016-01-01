@@ -26,15 +26,9 @@ export class Match {
 
 	// Whether data can be a continuation of match
 	isContinuation(data) {
-		if (this.map != data.map.name) {
+		if(this.rounds.length-2 > data.map.round) {
 			return false;
 		}
-
-		if (this.rounds.length > data.map.round + 1) {
-			return false;
-		}
-
-		//TODO: Check if score counts
 		return true;
 	}
 
@@ -54,6 +48,7 @@ export class Match {
 		if (rounds < 5) {
 			score += 5;
 		}
+		return score>5;
 	}
 
 	isOver() {

@@ -8,13 +8,13 @@ export class PlayersController {
 		this.collection = collection;
 
 		this._userCache = new NodeCache({
-			stdTTL: 3 * 60,
+			stdTTL: 180,
 			checkPeriod: 200,
 			useClones: false
 		});
 
 		this._userCache.on("del", (k, v) => {
-			co(save(v));
+			co(this.save(v));
 		});
 	}
 
@@ -28,6 +28,7 @@ export class PlayersController {
 				this._userCache.set(steamid, player);
 			}
 		}
+		this._userCache.ttl(steamid, 180);
 		return player;
 	}
 

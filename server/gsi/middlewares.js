@@ -21,7 +21,11 @@ export function checkCompetitive(data) {
 // Monitors match variables
 export function followMatch(player, data) {
 	if (!player.match) {
-		player.match = new Match(data.map.name, data.map.mode, data.provider.timestamp, data.provider.version);
+		if(data.map.phase != "gameover") {
+			player.match = new Match(data.map.name, data.map.mode, data.provider.timestamp, data.provider.version);
+		} else {
+			return new Error("Match over");
+		}
 	}
 
 	if (data.map.phase == "gameover" && player.match.isOver()) {

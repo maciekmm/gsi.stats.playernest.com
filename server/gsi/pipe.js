@@ -19,7 +19,7 @@ export class Pipe {
 
 	* process(req, res) {
 		let data = req.body;
-
+		//console.log(data);
 		for (let mw of self._preAuth) {
 			let error = mw(data);
 			if (error) {
@@ -51,7 +51,7 @@ export class Pipe {
 		for (let mw of self._middlewares) {
 			let error = mw(player, data);
 			if (error) {
-				console.log(error.stack);
+				console.log(error);
 				res.status(200).send(error.message);
 				return;
 			}
