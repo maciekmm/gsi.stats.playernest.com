@@ -3,7 +3,10 @@
 export function getRound(player, data) {
 	let round = player.match.rounds[data.map.round];
 
-	if (data.round && data.round.phase == 'over') {
+	if (data.round && (data.round.phase == 'over' || data.round.phase == 'freezetime')) {
+		if (data.map.round === 0) {
+			return round;
+		}
 		if (!round.phase || (round.phase && round.phase.length === 0)) {
 			round = player.match.rounds[data.map.round - 1];
 		}

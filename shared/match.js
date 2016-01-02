@@ -1,9 +1,6 @@
-import {
-	Round
-}
-from "./round";
+import Round from "./round";
 
-export class Match {
+export default class Match {
 	static fromDocument(doc) {
 		let match = new Match();
 		Object.assign(match, doc);
@@ -26,7 +23,7 @@ export class Match {
 
 	// Whether data can be a continuation of match
 	isContinuation(data) {
-		if(this.rounds.length-2 > data.map.round) {
+		if(this.rounds.length-1 <= data.map.round) {
 			return false;
 		}
 		return true;

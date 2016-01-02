@@ -1,9 +1,6 @@
-import {
-	Match
-}
-from "./match";
+import Match from "./match";
 
-export class Player {
+export default class Player {
 	static fromDocument(doc) {
 		let player = new Player(doc._id, doc.auth);
 		if (doc.match) {

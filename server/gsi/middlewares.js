@@ -1,6 +1,6 @@
 import * as helpers from "./helpers";
-import {Match} from "../models/match";
-import {Round} from "../models/round";
+import Match from "../../shared/match";
+import Round from "../../shared/round";
 
 const util = require("util");
 

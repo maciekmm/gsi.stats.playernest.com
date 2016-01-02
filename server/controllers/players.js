@@ -1,9 +1,9 @@
-import {Player} from "../models/player";
+import Player from "../../shared/player";
+import "co";
 
 const NodeCache = require("node-cache");
-const co = require("co");
 
-export class PlayersController {
+export default class PlayersController {
 	constructor(collection) {
 		this.collection = collection;
 
@@ -23,7 +23,7 @@ export class PlayersController {
 		if (!player) {
 			player = Player.fromDocument(yield this.collection.find({
 				_id: steamid
-			}).next());
+			},{matches: {$slice: -1}}).next());
 			if (player) {
 				this._userCache.set(steamid, player);
 			}
@@ -35,9 +35,30 @@ export class PlayersController {
 	* save(player) {
 		let copy = {};
 		Object.assign(copy, player);
-		delete copy._oldData;
 		yield this.collection.update({
 			_id: copy._id
-		}, copy);
+		}, {
+			match: copy.match,
+			auth: copy.auth,
+		});
+	}
+
+	* saveMatch(player) {
+		let copy = {};
+		Object.assign(copy, player);
+		yield this.collection.update({
+			_id: copy._id
+		}, {
+			'$push': {'matches': player.match}
+		});
+		player.match = null;
+	}
+
+	* stop() {
+		let keys = this._userCache.keys();
+		for(let key of keys) {
+			let user = this._userCache.get(key);
+			yield this.save(user);
+		}
 	}
 }

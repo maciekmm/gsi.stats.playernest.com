@@ -1,14 +1,12 @@
 import * as middlewares from "./middlewares";
-import {
-	Player
-}
-from "../models/player";
+import Player from "../../shared/player";
 
 const util = require("util");
 
+//Damn get rid of this
 var self;
 
-export class Pipe {
+export default class Pipe {
 
 	constructor(coord) {
 		self = this;
@@ -42,7 +40,7 @@ export class Pipe {
 		//Check if can be a continuation of previous match
 		if (player.match && !player.match.isContinuation(data)) {
 			if (!player.match.isTrash()) {
-				yield self.coord.save(player);
+				yield self.coord.saveMatch(player);
 			}
 			player.match = null;
 		}
@@ -57,12 +55,11 @@ export class Pipe {
 			}
 		}
 
-		yield self.coord.save(player);
 		if (player.match.isOver()) {
-			player.matches.push(player.match);
-			player.match = null;
-			yield self.coord.save(player);
+			player.matches.unshift(player.match);
+			yield self.coord.saveMatch(player);
 		}
+
 		res.send('OK');
 		return;
 	}

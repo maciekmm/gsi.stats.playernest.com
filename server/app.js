@@ -1,17 +1,8 @@
-import {
-	Pipe
-}
-from "./gsi/pipe";
+//import "babel-polyfill";
+import Pipe from "./gsi/pipe";
+import Player from "../shared/player";
+import PlayersController from "./controllers/players";
 
-import {
-	Player
-}
-from "./models/player";
-
-import {
-	PlayersController
-}
-from "./controllers/players";
 
 const cfg = require("./config/config." + (process.env.NODE_ENV || 'dev') + ".json");
 const MongoClient = require('mongodb').MongoClient;
@@ -34,10 +25,25 @@ MongoClient.connect(cfg.mongo.uri, (err, db) => {
 	start(db);
 });
 
+
+
 function start(db) {
 	const app = require("express")();
 	const coord = new PlayersController(db.collection("players"));
 	const pipe = new Pipe(coord);
+
+	process.on('SIGINT', exit);
+	process.on('SIGTERM', exit);
+
+	function exit() {
+		co(coord.stop()).then((v) => {
+			console.log("Saved profiles, exitting.");
+			process.exit(1);
+		}).catch((err) => {
+			console.log(err);
+			process.exit(1);
+		});
+	}
 
 	app.use(passport.initialize());
 	app.use(passport.session());
@@ -75,7 +81,7 @@ function start(db) {
 		});
 
 	app.post('/gsi', wrap(pipe.process));
-	app.post('/profile', ensureAuthenticated, (req,res) => {
+	app.post('/profile', ensureAuthenticated, (req, res) => {
 		res.
 		res.send();
 	});
@@ -86,6 +92,8 @@ function start(db) {
 }
 
 function ensureAuthenticated(req, res, next) {
-  if (req.isAuthenticated()) { return next(); }
-  res.redirect('/auth');
+	if (req.isAuthenticated()) {
+		return next();
+	}
+	res.redirect('/auth');
 }
