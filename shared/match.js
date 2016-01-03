@@ -12,7 +12,8 @@ export default class Match {
 		return match;
 	}
 
-	constructor(map, mode, start, version) {
+	constructor(/*owner,*/ map, mode, start, version) {
+		//this.owner = owner;
 		this.map = map;
 		this.mode = mode;
 		this.start = start;
@@ -23,6 +24,9 @@ export default class Match {
 
 	// Whether data can be a continuation of match
 	isContinuation(data) {
+		if(data.map.name!=this.map) {
+			return false;
+		}
 		if(this.rounds.length-1 <= data.map.round) {
 			return false;
 		}

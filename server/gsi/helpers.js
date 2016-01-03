@@ -8,7 +8,12 @@ export function getRound(player, data) {
 			return round;
 		}
 		if (!round.phase || (round.phase && round.phase.length === 0)) {
-			round = player.match.rounds[data.map.round - 1];
+			let r = player.match.rounds[data.map.round - 1];
+			if(!r) {
+				return round;
+			} else {
+				return r;
+			}
 		}
 	}
 
