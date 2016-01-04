@@ -8,9 +8,10 @@ var self;
 
 export default class Pipe {
 
-	constructor(coord) {
+	constructor(players, matches) {
 		self = this;
-		this.coord = coord;
+		this.players = players;
+		this.matches = matches;
 		this._preAuth = [middlewares.checkComponents, middlewares.checkCompetitive];
 		this._middlewares = [middlewares.followMatch, middlewares.followRound, middlewares.archive];
 	}
@@ -27,7 +28,7 @@ export default class Pipe {
 			}
 		}
 
-		let player = yield self.coord.find(data.provider.steamid);
+		let player = yield self.players.find(data.provider.steamid);
 
 		//Load user
 		console.log(util.inspect(player.match, false, null));
@@ -40,7 +41,7 @@ export default class Pipe {
 		//Check if can be a continuation of previous match
 		if (player.match && !player.match.isContinuation(data)) {
 			if (!player.match.isTrash()) {
-				yield self.coord.saveMatch(player);
+				yield self.matches.push(player.match);
 			}
 			player.match = null;
 		}
@@ -57,7 +58,7 @@ export default class Pipe {
 
 		if (player.match.isOver()) {
 			player.matches.unshift(player.match);
-			yield self.coord.saveMatch(player);
+			yield self.matches.push(player.match);
 		}
 
 		res.send('OK');

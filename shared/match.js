@@ -12,8 +12,8 @@ export default class Match {
 		return match;
 	}
 
-	constructor(/*owner,*/ map, mode, start, version) {
-		//this.owner = owner;
+	constructor(owner, map, mode, start, version) {
+		this.owner = owner;
 		this.map = map;
 		this.mode = mode;
 		this.start = start;

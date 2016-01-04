@@ -23,7 +23,7 @@ export default class PlayersController {
 		if (!player) {
 			player = Player.fromDocument(yield this.collection.find({
 				_id: steamid
-			},{matches: {$slice: -1}}).next());
+			}).next());
 			if (player) {
 				this._userCache.set(steamid, player);
 			}
@@ -43,22 +43,17 @@ export default class PlayersController {
 		});
 	}
 
-	* saveMatch(player) {
-		let copy = {};
-		Object.assign(copy, player);
-		yield this.collection.update({
-			_id: copy._id
-		}, {
-			'$push': {'matches': player.match}
-		});
-		player.match = null;
-	}
-
 	* stop() {
 		let keys = this._userCache.keys();
 		for(let key of keys) {
 			let user = this._userCache.get(key);
 			yield this.save(user);
 		}
+	}
+
+	* handler(req, res) {
+		//TODO: Add some basic stats (K/D etc.)
+		res.json(JSON.stringify(yield this.find(req.params.steamid)));
+		//res.send("")
 	}
 }

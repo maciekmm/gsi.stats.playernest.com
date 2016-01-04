@@ -1,8 +1,9 @@
 //import "babel-polyfill";
 import Pipe from "./gsi/pipe";
 import Player from "../shared/player";
-import PlayersController from "./controllers/players";
 
+import PlayersController from "./controllers/players";
+import MatchesController from "./controllers/matches";
 
 const cfg = require("./config/config." + (process.env.NODE_ENV || 'dev') + ".json");
 const MongoClient = require('mongodb').MongoClient;
@@ -12,31 +13,34 @@ const bodyParser = require("body-parser");
 const passport = require("passport");
 const crypto = require('crypto');
 const SteamStrategy = require("passport-steam").Strategy;
-
-passport.serializeUser(function(user, done) {
-	done(null, user);
-});
-
-passport.deserializeUser(function(obj, done) {
-	done(null, obj);
-});
+const escape = require('html-escape');
 
 MongoClient.connect(cfg.mongo.uri, (err, db) => {
 	start(db);
 });
 
 
+function ensureAuthenticated(req, res, next) {
+	if (req.isAuthenticated()) {
+		if (!req.params.steamid || req.params.steamid == req.user.steamid) {
+			return next();
+		}
+	}
+	res.status(403);
+}
 
 function start(db) {
 	const app = require("express")();
-	const coord = new PlayersController(db.collection("players"));
-	const pipe = new Pipe(coord);
+	const players = new PlayersController(db.collection("players"));
+	const matches = new MatchesController(db.collection("matches"));
+
+	const pipe = new Pipe(players, matches);
 
 	process.on('SIGINT', exit);
 	process.on('SIGTERM', exit);
 
 	function exit() {
-		co(coord.stop()).then((v) => {
+		co(players.stop()).then((v) => {
 			console.log("Saved profiles, exitting.");
 			process.exit(1);
 		}).catch((err) => {
@@ -45,6 +49,14 @@ function start(db) {
 		});
 	}
 
+	passport.serializeUser(function(user, done) {
+		done(null, user);
+	});
+
+	passport.deserializeUser(function(obj, done) {
+		done(null, obj);
+	});
+
 	app.use(passport.initialize());
 	app.use(passport.session());
 	app.use(bodyParser.json());
@@ -52,19 +64,19 @@ function start(db) {
 	passport.use(new SteamStrategy({
 			returnURL: 'http://i.stats.playernest.com/auth/return',
 			realm: 'http://i.stats.playernest.com/',
-			apiKey: ''
+			apiKey: 'E0214EAEA47D85A38B6B6BEF3AB5E317'
 		},
 		co.wrap(function*(identifier, profile, done) {
 			const id = identifier.replace('http://steamcommunity.com/openid/id/', '');
 
-			let user = yield coord.find(id);
+			let user = yield players.find(id);
 
 			if (!user) {
 				user = new Player(id, crypto.randomBytes(64).toString('hex'));
 			}
 			//TODO: Escape
-			user.name = profile.displayName;
-			user.avatar = profile.avatar;
+			//user.name = profile.displayName;
+			//user.avatar = profile.avatar;
 
 			done(null, user);
 		})
@@ -77,23 +89,17 @@ function start(db) {
 			failureRedirect: '/auth'
 		}),
 		function(req, res) {
-			res.redirect('/dashboard');
+			console.log("s");
+			res.redirect('/profile/76561198044246594');
 		});
 
 	app.post('/gsi', wrap(pipe.process));
-	app.post('/profile', ensureAuthenticated, (req, res) => {
-		res.
-		res.send();
-	});
+
+	app.get('/profile/:steamid', ensureAuthenticated, wrap(players.handler));
+
+	app.get('/matches/:steamid', ensureAuthenticated, wrap(matches.handler));
 
 	app.listen(cfg.server.port, function() {
 		console.log("Started");
 	});
-}
-
-function ensureAuthenticated(req, res, next) {
-	if (req.isAuthenticated()) {
-		return next();
-	}
-	res.redirect('/auth');
 }
