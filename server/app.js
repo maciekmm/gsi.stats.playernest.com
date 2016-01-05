@@ -64,7 +64,7 @@ function start(db) {
 	passport.use(new SteamStrategy({
 			returnURL: 'http://i.stats.playernest.com/auth/return',
 			realm: 'http://i.stats.playernest.com/',
-			apiKey: 'E0214EAEA47D85A38B6B6BEF3AB5E317'
+			apiKey: cfg.steam.key
 		},
 		co.wrap(function*(identifier, profile, done) {
 			const id = identifier.replace('http://steamcommunity.com/openid/id/', '');
@@ -89,7 +89,6 @@ function start(db) {
 			failureRedirect: '/auth'
 		}),
 		function(req, res) {
-			console.log("s");
 			res.redirect('/profile/76561198044246594');
 		});
 

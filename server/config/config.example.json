@@ -6,5 +6,9 @@
 	"server": {
 		"hostname": "localhost",
 		"port": 4400
+	},
+
+	"steam": {
+		"key": ""
 	}
 }

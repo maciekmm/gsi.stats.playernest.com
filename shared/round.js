@@ -2,6 +2,7 @@ export default class Round {
 	static fromDocument(doc) {
 		let round = new Round();
 		Object.assign(round, doc);
+		return round;
 	}
 
 	constructor() {

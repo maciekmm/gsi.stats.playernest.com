@@ -1,6 +1,6 @@
 import Player from "../../shared/player";
-import "co";
 
+const co = require("co");
 const NodeCache = require("node-cache");
 
 export default class PlayersController {

@@ -4,9 +4,9 @@ export default class Match {
 	static fromDocument(doc) {
 		let match = new Match();
 		Object.assign(match, doc);
-		for (let i = 0; i < doc.rounds.length; i++) {
-			if (doc.rounds[i]) {
-				match.rounds[i] = Round.fromDocument(doc.rounds[i]);
+		for (let i = 0; i < match.rounds.length; i++) {
+			if (match.rounds[i]) {
+				match.rounds[i] = Round.fromDocument(match.rounds[i]);
 			}
 		}
 		return match;
@@ -24,10 +24,10 @@ export default class Match {
 
 	// Whether data can be a continuation of match
 	isContinuation(data) {
-		if(data.map.name!=this.map) {
+		if (data.map.name != this.map) {
 			return false;
 		}
-		if(this.rounds.length-1 <= data.map.round) {
+		if (this.rounds.length - 1 > data.map.round) {
 			return false;
 		}
 		return true;
@@ -49,7 +49,7 @@ export default class Match {
 		if (rounds < 5) {
 			score += 5;
 		}
-		return score>5;
+		return score > 5;
 	}
 
 	isOver() {

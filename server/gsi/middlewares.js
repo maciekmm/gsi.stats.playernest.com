@@ -22,7 +22,7 @@ export function checkCompetitive(data) {
 export function followMatch(player, data) {
 	if (!player.match) {
 		if(data.map.phase != "gameover") {
-			player.match = new Match(player.steamid, data.map.name, data.map.mode, data.provider.timestamp, data.provider.version);
+			player.match = new Match(player._id, data.map.name, data.map.mode, data.provider.timestamp, data.provider.version);
 		} else {
 			return new Error("Match over");
 		}

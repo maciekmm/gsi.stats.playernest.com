@@ -18,7 +18,7 @@ export default class Pipe {
 
 	* process(req, res) {
 		let data = req.body;
-		//console.log(data);
+		//console.log(JSON.stringify(data));
 		for (let mw of self._preAuth) {
 			let error = mw(data);
 			if (error) {
@@ -31,7 +31,7 @@ export default class Pipe {
 		let player = yield self.players.find(data.provider.steamid);
 
 		//Load user
-		console.log(util.inspect(player.match, false, null));
+		//console.log(util.inspect(player.match, false, null));
 
 		if (!player || player.auth != data.auth.token) {
 			res.status(200).send('Auth token doesn\'t match');
@@ -41,7 +41,11 @@ export default class Pipe {
 		//Check if can be a continuation of previous match
 		if (player.match && !player.match.isContinuation(data)) {
 			if (!player.match.isTrash()) {
+				console.log("saving old");
+				console.log(player.match);
 				yield self.matches.push(player.match);
+			} else {
+				console.log("del old");
 			}
 			player.match = null;
 		}
@@ -57,7 +61,6 @@ export default class Pipe {
 		}
 
 		if (player.match.isOver()) {
-			player.matches.unshift(player.match);
 			yield self.matches.push(player.match);
 		}
 
