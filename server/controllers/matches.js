@@ -9,7 +9,7 @@ export default class MatchesController {
 	}
 
 	* push(match) {
-		yield this.collection.insert(match);
+		yield this.collection.save(match);
 	}
 
 	* handler(req, res) {

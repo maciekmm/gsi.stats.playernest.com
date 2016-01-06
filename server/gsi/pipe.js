@@ -29,11 +29,11 @@ export default class Pipe {
 		}
 
 		let player = yield self.players.find(data.provider.steamid);
-
 		//Load user
 		//console.log(util.inspect(player.match, false, null));
 
 		if (!player || player.auth != data.auth.token) {
+			console.log("wtf");
 			res.status(200).send('Auth token doesn\'t match');
 			return;
 		}

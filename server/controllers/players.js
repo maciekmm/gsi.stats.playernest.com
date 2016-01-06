@@ -21,11 +21,15 @@ export default class PlayersController {
 	* find(steamid) {
 		let player = this._userCache.get(steamid);
 		if (!player) {
-			player = Player.fromDocument(yield this.collection.find({
+			let cursor = this.collection.find({
 				_id: steamid
-			}).next());
+			});
+			let player = yield cursor.hasNext() ? yield cursor.next() : null;
 			if (player) {
+				player = Player.fromDocument(player);
 				this._userCache.set(steamid, player);
+			} else {
+				return null;
 			}
 		}
 		this._userCache.ttl(steamid, 180);
@@ -53,7 +57,7 @@ export default class PlayersController {
 
 	* handler(req, res) {
 		//TODO: Add some basic stats (K/D etc.)
-		res.json(JSON.stringify(yield this.find(req.params.steamid)));
+		res.json(yield this.find(req.params.steamid));
 		//res.send("")
 	}
 }

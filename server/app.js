@@ -21,12 +21,14 @@ MongoClient.connect(cfg.mongo.uri, (err, db) => {
 
 
 function ensureAuthenticated(req, res, next) {
+	console.log(req.session);
+	console.log(req.user);
 	if (req.isAuthenticated()) {
-		if (!req.params.steamid || req.params.steamid == req.user.steamid) {
+		if (!req.params.steamid || req.params.steamid == req.user._id) {
 			return next();
 		}
 	}
-	res.status(403);
+	res.status(403).jsonp({error:"Not authenticated"});
 }
 
 function start(db) {
@@ -69,7 +71,12 @@ function start(db) {
 		co.wrap(function*(identifier, profile, done) {
 			const id = identifier.replace('http://steamcommunity.com/openid/id/', '');
 
+			console.log("atf");
+			console.log(id);
+
 			let user = yield players.find(id);
+
+			console.log(user);
 
 			if (!user) {
 				user = new Player(id, crypto.randomBytes(64).toString('hex'));
@@ -89,14 +96,15 @@ function start(db) {
 			failureRedirect: '/auth'
 		}),
 		function(req, res) {
+			console.log("authed!");
 			res.redirect('/profile/76561198044246594');
 		});
 
 	app.post('/gsi', wrap(pipe.process));
 
-	app.get('/profile/:steamid', ensureAuthenticated, wrap(players.handler));
+	app.get('/profile/:steamid', ensureAuthenticated, wrap(players.handler.bind(players)));
 
-	app.get('/matches/:steamid', ensureAuthenticated, wrap(matches.handler));
+	app.get('/matches/:steamid', ensureAuthenticated, wrap(matches.handler.bind(matches)));
 
 	app.listen(cfg.server.port, function() {
 		console.log("Started");
