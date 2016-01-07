@@ -100,7 +100,7 @@ function start(db) {
 			res.redirect('/profile/76561198044246594');
 		});
 
-	app.post('/gsi', wrap(pipe.process));
+	app.post('/gsi', wrap(pipe.process.bind(pipe)));
 
 	app.get('/profile/:steamid', ensureAuthenticated, wrap(players.handler.bind(players)));
 

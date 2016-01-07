@@ -17,6 +17,8 @@ TODO
 
 - GET /matches/:steamid/?after=time / before=time&limit=5 //returns matches for specific player [permission required],
 - GET /profile/:steamid/?span=week //returns profile info for specific player as well as basic stats (kills, deaths, assists, kd-ratio) [permission required].
+- Clean interface using bootstrap
+- React.js front-end
 
 ## Client
 

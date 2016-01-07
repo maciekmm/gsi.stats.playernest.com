@@ -3,9 +3,6 @@ import Player from "../../shared/player";
 
 const util = require("util");
 
-//Damn get rid of this
-var self;
-
 export default class Pipe {
 
 	constructor(players, matches) {
@@ -19,7 +16,7 @@ export default class Pipe {
 	* process(req, res) {
 		let data = req.body;
 		//console.log(JSON.stringify(data));
-		for (let mw of self._preAuth) {
+		for (let mw of this._preAuth) {
 			let error = mw(data);
 			if (error) {
 				//We send 200 because
@@ -28,7 +25,7 @@ export default class Pipe {
 			}
 		}
 
-		let player = yield self.players.find(data.provider.steamid);
+		let player = yield this.players.find(data.provider.steamid);
 		//Load user
 		//console.log(util.inspect(player.match, false, null));
 
@@ -43,7 +40,7 @@ export default class Pipe {
 			if (!player.match.isTrash()) {
 				console.log("saving old");
 				console.log(player.match);
-				yield self.matches.push(player.match);
+				yield this.matches.push(player.match);
 			} else {
 				console.log("del old");
 			}
@@ -51,7 +48,7 @@ export default class Pipe {
 		}
 
 		//Other middlewares
-		for (let mw of self._middlewares) {
+		for (let mw of this._middlewares) {
 			let error = mw(player, data);
 			if (error) {
 				console.log(error);
@@ -61,7 +58,7 @@ export default class Pipe {
 		}
 
 		if (player.match.isOver()) {
-			yield self.matches.push(player.match);
+			yield this.matches.push(player.match);
 		}
 
 		res.send('OK');
